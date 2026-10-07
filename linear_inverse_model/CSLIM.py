@@ -906,7 +906,7 @@ class CSLIM(object):
                 
             j_index = (initial_state_j_index-1 + (istep//time_steps)% self.period_T) % self.period_T
             
-            Sj =  Qj_eigenvectors[j_index] @ np.sqrt(Qj_eigenvalues[j_index]) 
+            Sj =  Qj_eigenvectors[j_index] @ np.diag(np.sqrt(Qj_eigenvalues[j_index])) 
             
             y_t_plus_delta_t = y_t + delta_t * Lj[j_index] @ y_t + np.sqrt(delta_t) * Sj @ r_t
             
