@@ -797,7 +797,7 @@ class CSLIM(object):
         
     # ---------------------------------   
     
-    def simulations_with_noise(self, time_steps, simulation_length, initial_condition=None, initial_condition_j_index=None, seed=None):   
+    def simulations_with_noise(self, time_steps, simulation_length, initial_state=None, initial_state_j_index=None, seed=None):   
                    
         """
         Generate stochastic simulations using a CSLIM.
@@ -866,15 +866,15 @@ class CSLIM(object):
                 raise ValueError("'initial_state' contains NaN or Inf! Please remove or fill them before proceeding.")
 
         # validate initial_state            
-        if initial_condition_j_index is None:
-            initial_condition_j_index=1   
+        if initial_state_j_index is None:
+            initial_state_j_index=1   
         else:
-            if not isinstance(initial_condition_j_index, int):
-                raise TypeError("'initial_condition_j_index' must be an integer.")
-            if initial_condition_j_index < 1:
-                raise ValueError("'initial_condition_j_index' must be a positive integer.")
-            if initial_condition_j_index > self.period_T:
-                raise ValueError("'initial_condition_j_index' must < self.period_T.")
+            if not isinstance(initial_state_j_index, int):
+                raise TypeError("'initial_state_j_index' must be an integer.")
+            if initial_state_j_index < 1:
+                raise ValueError("'initial_state_j_index' must be a positive integer.")
+            if initial_state_j_index > self.period_T:
+                raise ValueError("'initial_state_j_index' must < self.period_T.")
             
         # validate seed            
         if seed is not None:
@@ -904,7 +904,7 @@ class CSLIM(object):
             else:
                 r_t[:,0] = np.random.normal(size=(self.spatial_length))
                 
-            j_index = (initial_condition_j_index-1 + (istep//time_steps)% self.period_T) % self.period_T
+            j_index = (initial_state_j_index-1 + (istep//time_steps)% self.period_T) % self.period_T
             
             Sj =  Qj_eigenvectors[j_index] @ np.sqrt(Qj_eigenvalues[j_index]) 
             
