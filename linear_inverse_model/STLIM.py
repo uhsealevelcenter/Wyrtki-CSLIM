@@ -447,7 +447,7 @@ class STLIM(object):
             x_tau_forecast = G_tau @ x_forecast_from
         else:  
             for itau_idx, itau in enumerate(tau_arr):
-                x_tau_forecast[itau_idx] = G_tau[itau-1] @ x_forecast_from
+                x_tau_forecast[itau_idx] = G_tau[itau_idx] @ x_forecast_from
 
         return x_tau_forecast       
 
@@ -551,7 +551,7 @@ class STLIM(object):
             
             # Store once per model time unit
             if (istep+1) % time_steps == 0:
-                time_index = int(istep//time_steps)-1
+                time_index = istep//time_steps
                 simulations[:,time_index] = np.real(y_t_plus_half_delta_t.ravel())
             
             y_t = y_t_plus_delta_t        

@@ -480,7 +480,7 @@ class CSLIM(object):
                 xjplus1 = self.x_CSLIM_training[:,1:,(j+1)%self.period_T]
                 Cplus1_j = xjplus1 @ xjplus1.T / (xjplus1.shape[-1] - 1)   
                                            
-            elif (j>0) & (j<self.period_T):                           
+            elif (j>0) & (j<self.period_T-1):                           
                 xj = self.x_CSLIM_training[:,:,j]
                 C0_j = xj @ xj.T / (xj.shape[-1] - 1)
                 
@@ -644,6 +644,9 @@ class CSLIM(object):
         
         xj_tau_forecast = np.full((tau_arr.shape[0], self.spatial_length), np.nan, dtype=complex)
         Gj_tau = self.propogate_operator_Gtau(tau_for_G=tau_arr)
+        # Restore the lead-time axis when only one lead is requested.
+        if Gj_tau.ndim == 3:
+           Gj_tau = Gj_tau[np.newaxis, ...]
 
         for itau_idx, itau in enumerate(tau_arr):
             Gj_tau_for_forecast = Gj_tau[itau_idx,x_forecast_from_j_index-1]
@@ -797,7 +800,7 @@ class CSLIM(object):
         
     # ---------------------------------   
     
-    def simulations_with_noise(self, time_steps, simulation_length, initial_condition=None, initial_condition_j_index=None, seed=None):   
+    def simulations_with_noise(self, time_steps, simulation_length, initial_state=None, initial_state_j_index=None, seed=None):   
                    
         """
         Generate stochastic simulations using a CSLIM.
@@ -866,15 +869,15 @@ class CSLIM(object):
                 raise ValueError("'initial_state' contains NaN or Inf! Please remove or fill them before proceeding.")
 
         # validate initial_state            
-        if initial_condition_j_index is None:
-            initial_condition_j_index=1   
+        if initial_state_j_index is None:
+            initial_state_j_index=1   
         else:
-            if not isinstance(initial_condition_j_index, int):
-                raise TypeError("'initial_condition_j_index' must be an integer.")
-            if initial_condition_j_index < 1:
-                raise ValueError("'initial_condition_j_index' must be a positive integer.")
-            if initial_condition_j_index > self.period_T:
-                raise ValueError("'initial_condition_j_index' must < self.period_T.")
+            if not isinstance(initial_state_j_index, int):
+                raise TypeError("'initial_state_j_index' must be an integer.")
+            if initial_state_j_index < 1:
+                raise ValueError("'initial_state_j_index' must be a positive integer.")
+            if initial_state_j_index > self.period_T:
+                raise ValueError("'initial_state_j_index' must < self.period_T.")
             
         # validate seed            
         if seed is not None:
@@ -904,9 +907,9 @@ class CSLIM(object):
             else:
                 r_t[:,0] = np.random.normal(size=(self.spatial_length))
                 
-            j_index = (initial_condition_j_index-1 + (istep//time_steps)% self.period_T) % self.period_T
+            j_index = (initial_state_j_index-1 + (istep//time_steps)% self.period_T) % self.period_T
             
-            Sj =  Qj_eigenvectors[j_index] @ np.sqrt(Qj_eigenvalues[j_index]) 
+            Sj =  Qj_eigenvectors[j_index] @ np.diag(np.sqrt(Qj_eigenvalues[j_index])) 
             
             y_t_plus_delta_t = y_t + delta_t * Lj[j_index] @ y_t + np.sqrt(delta_t) * Sj @ r_t
             
@@ -914,7 +917,7 @@ class CSLIM(object):
                     
             # Store once per model time unit
             if (istep+1) % time_steps == 0:
-                time_index = int(istep//time_steps)-1
+                time_index = istep//time_steps
                 simulations[:,time_index] = np.real(y_t_plus_half_delta_t.ravel())
             
             y_t = y_t_plus_delta_t             
