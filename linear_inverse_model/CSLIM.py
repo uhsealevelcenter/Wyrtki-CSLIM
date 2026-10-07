@@ -480,7 +480,7 @@ class CSLIM(object):
                 xjplus1 = self.x_CSLIM_training[:,1:,(j+1)%self.period_T]
                 Cplus1_j = xjplus1 @ xjplus1.T / (xjplus1.shape[-1] - 1)   
                                            
-            elif (j>0) & (j<self.period_T):                           
+            elif (j>0) & (j<self.period_T-1):                           
                 xj = self.x_CSLIM_training[:,:,j]
                 C0_j = xj @ xj.T / (xj.shape[-1] - 1)
                 
