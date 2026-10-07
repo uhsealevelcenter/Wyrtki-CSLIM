@@ -644,6 +644,9 @@ class CSLIM(object):
         
         xj_tau_forecast = np.full((tau_arr.shape[0], self.spatial_length), np.nan, dtype=complex)
         Gj_tau = self.propogate_operator_Gtau(tau_for_G=tau_arr)
+        # Restore the lead-time axis when only one lead is requested.
+        if Gj_tau.ndim == 3:
+           Gj_tau = Gj_tau[np.newaxis, ...]
 
         for itau_idx, itau in enumerate(tau_arr):
             Gj_tau_for_forecast = Gj_tau[itau_idx,x_forecast_from_j_index-1]
